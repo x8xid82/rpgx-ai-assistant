@@ -24,6 +24,6 @@
   ],
   "url": "www.rpgxstudios.com",
   "manifest": "https://raw.githubusercontent.com/x8xid82/rpgx-ai-assistant/main/rpgx-ai/module.json",
-  "download": "https://github.com/x8xid82/rpgx-ai-assistant/releases/download/v2.0.0/rpgx-ai.zip",
+  "download": "https://github.com/x8xid82/rpgx-ai-assistant/releases/download/v2.0/rpgx-ai.zip",
   "license": "MIT"
 }
