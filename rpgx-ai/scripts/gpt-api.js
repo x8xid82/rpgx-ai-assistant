@@ -1,6 +1,27 @@
-// scripts/gpt-api.js — Query logic with streaming responses
+// scripts/gpt-api.js — Query logic with streaming responses + conversation memory
 import { moduleName, getSetting, buildSystemPrompt } from "./settings.js";
 import { renderMarkdown } from "./markdown.js";
+
+// ── Conversation history ──────────────────────────────────────────────────────
+// Only tracks direct Ollama exchanges. RAG queries are stateless by design
+// (RAG builds its own context per-query from the knowledge base).
+const MAX_HISTORY_EXCHANGES = 8; // Keep last 8 user/assistant pairs = 16 messages
+let conversationHistory = [];
+
+/** Clear conversation history — call this from /rpgx clear */
+export function clearHistory() {
+  conversationHistory = [];
+}
+
+/** Trim history to MAX_HISTORY_EXCHANGES exchanges */
+function trimHistory() {
+  const maxMessages = MAX_HISTORY_EXCHANGES * 2;
+  if (conversationHistory.length > maxMessages) {
+    conversationHistory = conversationHistory.slice(-maxMessages);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Send a question and stream the response into a Foundry chat message.
@@ -28,7 +49,7 @@ export async function streamReply(question, users) {
 
   let fullText = "";
   let streamed = false;
-  let ragFellBack = false;
+  let usedRag  = false;
 
   // ── Try RAG streaming first ──
   if (useRag && ragBase) {
@@ -49,16 +70,17 @@ export async function streamReply(question, users) {
         const contentType = res.headers.get("content-type") || "";
 
         if (contentType.includes("ndjson")) {
-          // Streaming response from RAG
-          const result = await readStream(res, msg);
+          // Streaming response from RAG — uses /api/generate format (parsed.response)
+          const result = await readStream(res, msg, "generate");
           fullText = result.text;
           streamed = true;
+          usedRag  = true;
 
           // If RAG returned NO_CONTEXT, fall back to Ollama
           if (result.noContext) {
             fullText = "";
             streamed = false;
-            ragFellBack = true;
+            usedRag  = false;
           }
         } else {
           // Non-streaming JSON (empty answer = no context match)
@@ -67,6 +89,7 @@ export async function streamReply(question, users) {
           if (ans) {
             fullText = ans;
             streamed = true;
+            usedRag  = true;
           }
         }
       }
@@ -75,7 +98,7 @@ export async function streamReply(question, users) {
     }
   }
 
-  // ── Fallback: stream directly from Ollama ──
+  // ── Fallback: stream directly from Ollama via /api/chat (supports history) ──
   if (!streamed) {
     const ollamaBase  = getSetting("ollamaBaseUrl", "http://127.0.0.1:11434");
     const model       = getSetting("ollamaModel");
@@ -85,16 +108,20 @@ export async function streamReply(question, users) {
     if (!ollamaBase) throw new Error("RPGX AI: Ollama Base URL is not set.");
     if (!model)      throw new Error("RPGX AI: Language Model is not set.");
 
-    const sys      = buildSystemPrompt();
-    const composed = `${sys}\nUSER: ${question}\nASSISTANT:`;
+    // Build message array: system + history + current question
+    const messages = [
+      { role: "system",  content: buildSystemPrompt() },
+      ...conversationHistory,
+      { role: "user",    content: question },
+    ];
 
     try {
-      const res = await fetch(`${ollamaBase}/api/generate`, {
+      const res = await fetch(`${ollamaBase}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model,
-          prompt: composed,
+          messages,
           stream: true,
           options: { temperature, num_predict },
         }),
@@ -105,10 +132,17 @@ export async function streamReply(question, users) {
         throw new Error(`Ollama HTTP ${res.status}: ${txt}`);
       }
 
-      const result = await readStream(res, msg);
+      // /api/chat streaming uses parsed.message.content instead of parsed.response
+      const result = await readStream(res, msg, "chat");
       fullText = result.text;
+
+      // Save this exchange to history for next turn
+      if (fullText) {
+        conversationHistory.push({ role: "user",      content: question });
+        conversationHistory.push({ role: "assistant", content: fullText });
+        trimHistory();
+      }
     } catch (e) {
-      // Update message with error
       await msg.update({
         content: buildReplyHtml(`<span style="color:#cc4444;">Error: ${e.message}</span>`),
       });
@@ -126,9 +160,16 @@ export async function streamReply(question, users) {
 
 /**
  * Read an NDJSON stream from the server and update a chat message live.
- * Returns the accumulated text and whether NO_CONTEXT was signaled.
+ *
+ * @param {Response} response - The fetch response
+ * @param {ChatMessage} msg   - The Foundry message to update
+ * @param {"generate"|"chat"} format
+ *   "generate" — Ollama /api/generate and RAG server: token is parsed.response
+ *   "chat"     — Ollama /api/chat: token is parsed.message.content
+ *
+ * @returns {Promise<{text: string, noContext: boolean}>}
  */
-async function readStream(response, msg) {
+async function readStream(response, msg, format = "generate") {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let fullText = "";
@@ -143,7 +184,6 @@ async function readStream(response, msg) {
 
       buffer += decoder.decode(value, { stream: true });
 
-      // Process complete lines from the buffer
       const lines = buffer.split("\n");
       buffer = lines.pop(); // Keep incomplete last line in buffer
 
@@ -153,21 +193,24 @@ async function readStream(response, msg) {
         try {
           const parsed = JSON.parse(line);
 
-          // Skip metadata lines (sources, no_context signal)
+          // Skip metadata lines (RAG sources, no_context signal)
           if (parsed.sources) continue;
           if (parsed.no_context) {
             noContext = true;
             continue;
           }
 
-          // Accumulate response text
-          const token = parsed.response || "";
+          // Extract token depending on which Ollama endpoint we're reading
+          const token =
+            format === "chat"
+              ? (parsed.message?.content ?? "")
+              : (parsed.response ?? "");
+
           if (token) {
             fullText += token;
             updateCounter++;
 
-            // Update the chat message periodically (every 3 tokens)
-            // to avoid hammering the DOM but still feel responsive
+            // Update the chat message every 3 tokens — responsive but not DOM-hammering
             if (updateCounter % 3 === 0) {
               await msg.update({
                 content: buildReplyHtml(escapeHtml(fullText) + '<span class="rpgx-cursor">▊</span>'),
@@ -180,12 +223,19 @@ async function readStream(response, msg) {
       }
     }
 
-    // Process any remaining buffer
+    // Process any remaining buffer content
     if (buffer.trim()) {
       try {
         const parsed = JSON.parse(buffer);
-        if (parsed.no_context) noContext = true;
-        else if (parsed.response) fullText += parsed.response;
+        if (parsed.no_context) {
+          noContext = true;
+        } else {
+          const token =
+            format === "chat"
+              ? (parsed.message?.content ?? "")
+              : (parsed.response ?? "");
+          if (token) fullText += token;
+        }
       } catch { /* skip */ }
     }
   } catch (e) {
