@@ -2,7 +2,7 @@
   "id": "rpgx-ai",
   "title": "RPGX AI ASSISTANT",
   "description": "AI-powered GM assistant for Foundry VTT. Query a local Ollama server from chat, ingest journals into a RAG knowledge base for world-aware answers.",
-  "version": "2.1",
+  "version": "v2.0.0",
   "compatibility": {
     "minimum": "10.00",
     "verified": "13.351"
