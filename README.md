@@ -1,120 +1,138 @@
-Overview
-RPG AI Assistant is a Foundry VTT module that connects your game world to a local AI language model. Using Retrieval-Augmented Generation (RAG), the assistant builds a searchable knowledge base from your world's journals and actor documents, then answers GM queries with context drawn directly from your own campaign materials.
-No cloud. No subscriptions. No sending your world data to a third party. Everything runs locally on your machine via Ollama.
+# RPGX AI Assistant
+### AI-Powered GM Assistant for Foundry VTT
 
-Features
+**Version:** v2.0.2 | **Last Updated:** April 25, 2026
+**Compatibility:** Foundry VTT v11+ (Verified on v13)
 
-🧠 World-Aware AI — Ingests your Foundry journals and actor sheets to build a per-world knowledge base
-💬 Streaming Chat Interface — Real-time responses with a live cursor and full markdown rendering
-📡 Broadcast to Chat — Send AI answers directly into Foundry's game chat as GM messages
-📚 Document Manager — Gmail-style panel for selecting, filtering, and ingesting world documents
-🗂️ Knowledge Base Panel — Per-document ingest and removal controls with world-scoped RAG
-🌐 Model Selection — Choose from any model available in your local Ollama instance
-⚙️ Configurable Settings — Adjustable token limits, timeout, top-K retrieval, game system, and more
+---
 
+## What is RPGX AI?
 
-Requirements
-DependencyVersionNotesFoundry VTTv10+RequiredOllamaLatestLocal LLM runtimeRPG AI RAG ServerLatestRequired companion server (see below)Node.jsv18+For running the RAG server
-Recommended Models (via Ollama)
+RPGX AI is a privacy-first AI assistant for Game Masters running Foundry VTT. It connects directly to a locally running [Ollama](https://ollama.com) instance, meaning your world data, session notes, and queries never leave your machine — no cloud, no subscriptions, no data collection.
 
-qwen2.5:14b — Fast, strong reasoning; great for most campaigns
-qwen3:30b — Higher quality; recommended for large or complex worlds
-nomic-embed-text — Required for embedding generation (must be pulled)
+Ask questions in the Foundry chat, get world-aware answers powered by your own knowledge base, and keep your game moving without breaking immersion.
 
-bashollama pull nomic-embed-text
-ollama pull qwen2.5:14b
+---
 
-Installation
-1. Install the Foundry Module
-In Foundry VTT, go to Add-on Modules → Install Module and paste the following manifest URL:
-https://raw.githubusercontent.com/X8Studios/rpg-ai-assistant/main/module.json
-Or download the latest release and install manually via the Foundry module manager.
-Module ID: rpgx-ai
+## Features
 
-2. Set Up the RAG Server
-The RPG AI Assistant requires the companion RAG Server to handle embeddings, vector search, and Ollama communication.
-Clone and start the server:
-bashgit clone https://github.com/X8Studios/rpg-ai-rag-server.git
-cd rpg-ai-rag-server
-npm install
-node server.cjs
-On Windows, use the included PowerShell launcher:
-powershellpowershell -ExecutionPolicy Bypass -File .\start-RAG.ps1
-The RAG server runs on http://localhost:3001 by default.
+- **Local AI Inference** — Connects to Ollama running on your own hardware. Your data stays yours.
+- **RAG Knowledge Base** — Ingest journal entries and actor notes into a per-world knowledge database for context-aware answers.
+- **Foundry Chat Integration** — Query the AI directly from the Foundry chat window with streaming responses.
+- **Markdown Rendering** — AI responses render with full markdown formatting in chat.
+- **Broadcast Mode** — AI replies can be queued and displayed to players in chat.
+- **Per-World Scoping** — Each world maintains its own isolated knowledge database.
+- **GM Notebook** — Maintain persistent GM notes and copy them into world knowledge bases.
 
-Note: The RAG server must be running on the same machine as Ollama. If you're hosting Foundry on a separate machine, see the Network Configuration section below.
+---
 
+## Requirements
 
-3. Configure the Module
-In Foundry VTT, open Module Settings → RPG AI Assistant and configure:
-SettingDefaultDescriptionRAG Server URLhttp://localhost:3001Address of your running RAG serverLanguage Modelqwen2.5:14bOllama model to use for responsesGame SystemD&D 5.5E (2024)Informs AI of your ruleset contextMax Tokens4096Maximum response lengthRequest Timeout300000 msTime to wait before aborting a queryRAG Top-K10Number of document chunks to retrieve per query
+- Foundry VTT v11 or higher
+- [Ollama](https://ollama.com) running locally or on your network
+- [RPGX Proton](http://www.rpgxstudios.com) desktop app (recommended) **or** a manually configured RAG server
 
-Usage
-Opening the Assistant
-Click the globe icon (🌐) in the Foundry toolbar to open the RPG AI Assistant panel.
-Ingesting Your World
+> **RPGX Proton** is the companion desktop app that bundles everything you need — Ollama management, the RAG server, and a standalone query panel — into a single Windows application. Ideal for GMs on remote Foundry hosting.
 
-Open the Document Manager (📁 icon in the assistant panel)
-Select the journals and actors you want the AI to learn from
-Click Ingest Selected — your documents are chunked, embedded, and stored locally
+---
 
-Re-ingest any time your world content changes. Each world maintains its own isolated knowledge base.
-Asking Questions
-Type your question in the chat input and press Enter or click Ask. The assistant streams its response in real time, pulling relevant context from your ingested documents.
-Example queries:
+## Installation
 
-"What do we know about the Thornwood Cult?"
-"Summarize Mira Voss's backstory."
-"What happened at the Battle of the Ember Gates?"
+### Via Foundry Module Manager (Recommended)
 
-Broadcasting to Game Chat
-Click the Broadcast button (📢) on any response to send it into Foundry's game chat as a GM message. Players will see the answer without the original question.
+1. Open Foundry VTT
+2. Go to **Settings → Install Add-on Module**
+3. Paste the manifest URL:
+   ```
+   https://github.com/x8xid82/rpgx-ai-assistant/releases/latest/download/module.json
+   ```
+4. Click **Install**
 
-Network Configuration
-By default, RPG AI Assistant assumes Foundry, Ollama, and the RAG server all run on the same machine.
-If Foundry is hosted on a separate server:
-The RAG server includes an Ollama proxy at /ollama/generate to handle cross-origin requests. Configure your RAG Server URL in module settings to point to the machine running the RAG server (e.g., http://192.168.1.50:3001).
-RPGX Proton users: The RPGX Proton desktop app handles all of this automatically, including remote Foundry support, bundled model management, and a GM Notebook with persistent global notes.
+### Manual Installation
 
-Product Tiers
-RPG AI Assistant (Free)RPGX Proton (Paid)Foundry VTT Module✅✅Local Foundry Setup✅✅Remote/Hosted FoundryManual setup✅ AutomaticGM Notebook (Global Notes)❌✅Integrated RAG Server UI❌✅Guided First-Run Setup❌✅
-→ Learn more at RPGXStudios.com
+See [MANUAL_INSTALL.md](./MANUAL_INSTALL.md) for step-by-step instructions — recommended for headless server users.
 
-Troubleshooting
-The assistant isn't responding.
+---
 
-Confirm the RAG server is running and accessible at the configured URL
-Check that Ollama is running (ollama list in your terminal)
-Verify nomic-embed-text has been pulled
+## Configuration
 
-Responses are slow or timing out.
+Once the module is enabled in your world:
 
-Increase the Request Timeout in module settings (recommended: 300000 ms for large models)
-Consider using a smaller model such as qwen2.5:14b for faster responses
+1. Go to **Settings → Module Settings → RPGX AI**
+2. Set your **RAG Server URL** (e.g. `http://localhost:3001`)
+3. Set your **Ollama Model** (e.g. `qwen2.5:14b`)
+4. Adjust **Max Tokens** (default: 4096), **Timeout** (default: 300000ms), and **RAG Top K** (default: 10) as needed
 
-The AI doesn't know about my world content.
+---
 
-Open the Document Manager and re-ingest your journals and actors
-Check the Knowledge Base panel to confirm documents show as ingested
-Make sure the correct world is active when ingesting
+## Development Log
 
-Broadcast messages don't appear in chat.
+### v2.0.2 — April 25, 2026
+- Added automatic update detection through Foundry's built-in module manager
+- Linked version number to GitHub Releases for proper manifest hosting
+- Fixed module.json asset publishing pipeline
 
-Confirm the Foundry module is active and the RAG server is reachable
-The module polls for pending broadcasts every 5 seconds — wait a moment after clicking Broadcast
+### v2.0.1
+- Set AI queries to run as a persistent chat with memory (8 message context window)
+- Added `/ai` chat command for querying the assistant
+- Added `/rpgx clear`, `/ai clear`, `/rpgx newchat`, `/ai newchat` commands to reset chat context
+- Added query guardrails to reduce false positives and hallucinations
+- Added instructions for AI to notate when it could not find information
 
+### v2.0.0 — Early Release
+- Query Ollama directly from Foundry chat
+- Single query threads (no memory)
+- RAG functions (browser-tethered)
 
-Contributing
-This module is actively developed by X8 Studios. Bug reports and feature requests are welcome via the Issues tab.
-Please do not submit pull requests without first opening a discussion issue.
+---
 
-License
-© 2025 X8 Studios / RPGX Studios. All rights reserved.
-This module is provided for personal use. Redistribution, modification, or commercial use without explicit written permission from X8 Studios is prohibited.
+## Architecture Overview
 
-Links
+RPGX AI is designed around a split-machine architecture to keep inference fully local:
 
-🌐 RPGXStudios.com
-📦 RPGX Proton Desktop App
-🐛 Report an Issue
-💬 Foundry VTT Discord
+```
+Foundry VTT (remote server)
+        ↕  HTTP
+RAG Server (local machine) ← → Ollama (local machine)
+```
+
+The Foundry module communicates with the RAG server, which handles knowledge base queries and proxies requests to Ollama. No data is transmitted outside your local network.
+
+---
+
+## Privacy
+
+RPGX AI is built privacy-first. All inference runs on your own hardware via Ollama. The module and RAG server make no external API calls. Your world content, session notes, and queries are never transmitted to any third-party service.
+
+---
+
+## License
+
+MIT License
+
+Copyright © 2026 RPGX Studios | X8 Studios
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+## Credits
+
+**Written & Designed by:** Ashton Rogers
+**Owned by:** RPGX Studios | X8 Studios
+
+---
+
+## Links
+
+| | |
+|---|---|
+| 🌐 Website | [rpgxstudios.com](http://rpgxstudios.com) |
+| 💬 Discord | [discord.gg/2xYN3FF4U](https://discord.gg/2xYN3FF4U) |
+| ❤️ Patreon | [patreon.com/c/rpgxstudios](https://www.patreon.com/c/rpgxstudios) |
+| 📘 Facebook | [RPGX Game Studios](https://www.facebook.com/p/RPGX-Game-Studios-100063706171843/) |
+| 📦 Releases | [GitHub Releases](https://github.com/x8xid82/rpgx-ai-assistant/releases) |
