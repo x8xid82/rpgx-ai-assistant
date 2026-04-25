@@ -2,16 +2,16 @@
   "id": "rpgx-ai",
   "title": "RPGX AI ASSISTANT",
   "description": "AI-powered GM assistant for Foundry VTT. Query a local Ollama server from chat, ingest journals into a RAG knowledge base for world-aware answers.",
-  "version": "v2.0.0",
+  "version": "v2.0.1",
   "compatibility": {
-    "minimum": "10.00",
-    "verified": "13.351"
+    "minimum": "10",
+    "verified": "13.350"
   },
   "authors": [
     {
       "name": "Ashton Rogers / RPGX / X8 Studios",
-      "url": "www.rpgxstudios.com",
-      "discord": "https://discord.gg/RH78srup"
+      "url": "http://www.rpgxstudios.com",
+      "discord": ""
     }
   ],
   "esmodules": [
@@ -24,6 +24,6 @@
   ],
   "url": "www.rpgxstudios.com",
   "manifest": "https://raw.githubusercontent.com/x8xid82/rpgx-ai-assistant/main/rpgx-ai/module.json",
-  "download": "https://github.com/x8xid82/rpgx-ai-assistant/releases/download/v2.0/rpgx-ai.zip",
+  "download": "https://github.com/x8xid82/rpgx-ai-assistant/releases/download/v2.0.1/rpgx-ai.zip",
   "license": "MIT"
 }
