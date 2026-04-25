@@ -1,6 +1,6 @@
 // scripts/module.js — Main entry: chat command handling + response display
 import { registerSettings, moduleName, getSetting } from "./settings.js";
-import { streamReply } from "./gpt-api.js";
+import { streamReply, clearHistory } from "./gpt-api.js";
 
 Hooks.once("init", () => {
   console.log(`${moduleName} | Initializing RPGX AI v2`);
@@ -50,16 +50,28 @@ Hooks.once("ready", () => {
 Hooks.on("chatMessage", (chatLog, message, chatData) => {
   let match;
 
-  // --- Whisper command: /w rpgx <question> ---
+  // ── History clear commands: /rpgx clear | /rpgx newchat | /ai clear | /ai newchat ──
+  // Must be checked BEFORE the general query patterns so "clear" isn't treated as a question.
+  const reClear = /^\/(rpgx|ai)\s+(clear|newchat)\s*$/i;
+  if (message.match(reClear)) {
+    clearHistory();
+    ui.notifications.info("RPGX AI: Conversation history cleared.");
+    return false;
+  }
+
+  // ── Whisper command: /w rpgx <question> | /w ai <question> ──
   const reWhisper = /^(\/w(?:hisper)?\s)(\[(?:[^\]]+)\]|(?:[^\s]+))\s*([^]*)/i;
   match = message.match(reWhisper);
   if (match) {
     const userAliases = match[2].replace(/[[\]]/g, "").split(",").map((n) => n.trim());
     const question = match[3].trim();
 
-    if (userAliases.some((u) => u.toLowerCase() === "rpgx")) {
+    // Accept either "rpgx" or "ai" as the bot alias in a whisper
+    const isRpgxAlias = (u) => u.toLowerCase() === "rpgx" || u.toLowerCase() === "ai";
+
+    if (userAliases.some(isRpgxAlias)) {
       const users = userAliases
-        .filter((n) => n.toLowerCase() !== "rpgx")
+        .filter((n) => !isRpgxAlias(n))
         .reduce(
           (arr, n) => arr.concat(ChatMessage.getWhisperRecipients(n)),
           [game.user]
@@ -84,11 +96,11 @@ Hooks.on("chatMessage", (chatLog, message, chatData) => {
     }
   }
 
-  // --- Public command: /rpgx <question> ---
-  const rePublic = /^\/rpgx\s+([^]*)/i;
+  // ── Public commands: /rpgx <question> | /ai <question> ──
+  const rePublic = /^\/(rpgx|ai)\s+([^]*)/i;
   match = message.match(rePublic);
   if (match) {
-    const question = match[1].trim();
+    const question = match[2].trim();
     echoQuestion(chatData, question);
     respondTo(question, []);
     return false;
