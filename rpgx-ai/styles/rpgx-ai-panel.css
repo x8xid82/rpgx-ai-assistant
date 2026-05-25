@@ -1,0 +1,177 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RPGX AI — Query Panel Styles
+   Add to module.json styles array: "styles/rpgx-ai-panel.css"
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── BRAIN BUTTON ───────────────────────────────────────────────────────── */
+#rpgx-ai-query-btn {
+  position:        fixed;
+  bottom:          62px;
+  left:            265px;       /* sits right of globe, left of Quest Log */
+  z-index:         100;
+  width:           36px;
+  height:          36px;
+  border-radius:   50%;
+  background:      radial-gradient(circle at 40% 35%, #2a2a45, #0e0e1c);
+  border:          1px solid var(--rpgx-border);
+  color:           var(--rpgx-blue, #4a9eff);
+  font-size:       16px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  box-shadow:      0 2px 12px rgba(0, 0, 0, 0.6);
+  transition:      border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  user-select:     none;
+}
+
+#rpgx-ai-query-btn:hover {
+  border-color: rgba(74, 158, 255, 0.55);
+  box-shadow:   0 0 16px rgba(74, 158, 255, 0.3), 0 2px 12px rgba(0, 0, 0, 0.6);
+  transform:    scale(1.1);
+}
+
+/* ─── QUERY PANEL ────────────────────────────────────────────────────────── */
+#rpgx-ai-query-panel {
+  position:        fixed;
+  bottom:          62px;        /* sits above the brain button */
+  left:            182px;
+  width:           320px;
+  z-index:         200;
+  display:         flex;
+  flex-direction:  column;
+  gap:             0;
+  background:      var(--rpgx-surface, #1e1e2e);
+  border:          1px solid var(--rpgx-border, rgba(212,169,68,0.28));
+  border-radius:   8px;
+  box-shadow:      0 8px 32px rgba(0, 0, 0, 0.7),
+                   0 0 0 1px rgba(255,255,255,0.04);
+  overflow:        hidden;
+
+  /* Hidden state */
+  opacity:         0;
+  pointer-events:  none;
+  transform:       translateY(8px);
+  transition:      opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Visible state — toggled by aria-hidden="false" */
+#rpgx-ai-query-panel[aria-hidden="false"] {
+  opacity:        1;
+  pointer-events: all;
+  transform:      translateY(0);
+}
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+.rpgx-qp-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         9px 12px 8px;
+  background:      var(--rpgx-bg, #13131f);
+  border-bottom:   1px solid var(--rpgx-border, rgba(212,169,68,0.28));
+  flex-shrink:     0;
+}
+
+.rpgx-qp-title {
+  font-size:      12px;
+  font-weight:    700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          var(--rpgx-gold, #d4a944);
+}
+
+.rpgx-qp-title i {
+  margin-right: 5px;
+  color:        var(--rpgx-blue, #4a9eff);
+}
+
+.rpgx-qp-close {
+  background:   none;
+  border:       none;
+  color:        var(--rpgx-text-muted, #8a8aaa);
+  font-size:    14px;
+  cursor:       pointer;
+  padding:      0 2px;
+  line-height:  1;
+  transition:   color 0.1s;
+}
+
+.rpgx-qp-close:hover {
+  color: var(--rpgx-text, #d0ccc4);
+}
+
+/* ─── TEXTAREA ───────────────────────────────────────────────────────────── */
+.rpgx-qp-input {
+  width:        100%;
+  box-sizing:   border-box;
+  background:   transparent;
+  color:        var(--rpgx-text, #d0ccc4);
+  border:       none;
+  border-bottom: 1px solid var(--rpgx-border, rgba(212,169,68,0.28));
+  padding:      10px 12px;
+  font-size:    13px;
+  font-family:  inherit;
+  line-height:  1.5;
+  resize:       none;
+  outline:      none;
+  flex-shrink:  0;
+}
+
+.rpgx-qp-input::placeholder {
+  color:      var(--rpgx-text-muted, #8a8aaa);
+  font-style: italic;
+  font-size:  12px;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────────── */
+.rpgx-qp-footer {
+  display:     flex;
+  align-items: center;
+  justify-content: space-between;
+  padding:     8px 12px;
+  flex-shrink: 0;
+}
+
+.rpgx-qp-toggle {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  font-size:   12px;
+  color:       var(--rpgx-text-muted, #8a8aaa);
+  cursor:      pointer;
+  user-select: none;
+}
+
+.rpgx-qp-toggle input[type="checkbox"] {
+  accent-color: var(--rpgx-blue, #4a9eff);
+  width:        13px;
+  height:       13px;
+  cursor:       pointer;
+}
+
+/* ─── SEND BUTTON ────────────────────────────────────────────────────────── */
+.rpgx-qp-send {
+  background:    rgba(74, 158, 255, 0.15);
+  color:         var(--rpgx-blue, #4a9eff);
+  border:        1px solid rgba(74, 158, 255, 0.35);
+  border-radius: 5px;
+  padding:       5px 14px;
+  font-size:     12px;
+  font-weight:   600;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  gap:           5px;
+  transition:    background 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.rpgx-qp-send:hover {
+  background:   rgba(74, 158, 255, 0.28);
+  border-color: rgba(74, 158, 255, 0.6);
+  box-shadow:   0 0 10px rgba(74, 158, 255, 0.2);
+}
+
+.rpgx-qp-send:active {
+  transform: scale(0.97);
+}
