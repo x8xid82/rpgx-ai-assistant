@@ -1,7 +1,7 @@
 # RPGX AI Assistant
 ### AI-Powered GM Assistant for Foundry VTT
 
-**Version:** v3.2.0 | **Last Updated:** May 2026
+**Version:** v3.2.1 | **Last Updated:** May 2026
 **Compatibility:** Foundry VTT v10+ (Verified on v14)
 
 ---
