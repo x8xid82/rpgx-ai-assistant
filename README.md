@@ -219,7 +219,7 @@ The **rpgx-ai Foundry module** is released under the MIT License.
 | | |
 |---|---|
 | 🌐 Website | [rpgxstudios.com](http://rpgxstudios.com) |
-| 💬 Discord | [discord.gg/2xYN3FF4U](https://discord.gg/2xYN3FF4U) |
+| 💬 Discord | [https://discord.gg/9PAuuDVUZJ](https://discord.gg/9PAuuDVUZJ) |
 | ❤️ Patreon | [patreon.com/c/rpgxstudios](https://www.patreon.com/c/rpgxstudios) |
 | 📘 Facebook | [RPGX Game Studios](https://www.facebook.com/p/RPGX-Game-Studios-100063706171843/) |
 | 📦 Releases | [GitHub Releases](https://github.com/x8xid82/rpgx-ai-assistant/releases) |
